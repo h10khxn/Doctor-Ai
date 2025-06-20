@@ -1,1 +1,1 @@
-cd-mini-doctor-ai-git-init
+# cd-mini-doctor-ai-git-init
