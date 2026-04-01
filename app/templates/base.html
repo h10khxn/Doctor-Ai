@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Mini Doctor AI{% endblock %} | AI Symptom Checker</title>
+  <meta name="description" content="{% block meta_desc %}Free AI-powered symptom checker. Describe your symptoms or select them from a list to get a preliminary disease assessment.{% endblock %}" />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="Mini Doctor AI" />
+
+  <!-- OpenGraph -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:title"       content="{% block og_title %}Mini Doctor AI — AI Symptom Checker{% endblock %}" />
+  <meta property="og:description" content="{% block og_desc %}Use AI to check your symptoms and get a preliminary disease assessment.{% endblock %}" />
+  <meta property="og:url"         content="{{ request.url }}" />
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "MedicalWebPage",
+    "name": "Mini Doctor AI",
+    "description": "AI-powered symptom checker for informational purposes only.",
+    "url": "{{ request.url_root }}",
+    "inLanguage": "en",
+    "medicalAudience": { "@type": "Patient" },
+    "lastReviewed": "2025-01-01"
+  }
+  </script>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}" />
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-container">
+      <a href="{{ url_for('routes.index') }}" class="nav-brand">&#x1FA7A; Mini Doctor AI</a>
+      <button class="nav-hamburger" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-links">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="nav-links" role="list">
+        <li><a href="{{ url_for('routes.index') }}"       class="nav-link {% if request.endpoint == 'routes.index' %}active{% endif %}">Symptom Checker</a></li>
+        <li><a href="{{ url_for('pages.about') }}"        class="nav-link {% if request.endpoint == 'pages.about' %}active{% endif %}">About</a></li>
+        <li><a href="{{ url_for('pages.how_it_works') }}" class="nav-link {% if request.endpoint == 'pages.how_it_works' %}active{% endif %}">How It Works</a></li>
+        {% if current_user.is_authenticated %}
+          <li><a href="{{ url_for('history.index') }}"   class="nav-link {% if request.endpoint == 'history.index' %}active{% endif %}">History</a></li>
+          <li><a href="{{ url_for('auth.logout') }}"     class="nav-link">Logout</a></li>
+        {% else %}
+          <li><a href="{{ url_for('auth.login') }}"      class="nav-link {% if request.endpoint == 'auth.login' %}active{% endif %}">Login</a></li>
+          <li><a href="{{ url_for('auth.register') }}"   class="nav-link nav-cta">Register</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </nav>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container" role="alert" aria-live="polite">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main id="main-content" role="main" tabindex="-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer role="contentinfo">
+    <div class="container">
+      <p class="disclaimer">&#9888; This tool is for informational purposes only. Always consult a qualified healthcare professional for medical advice, diagnosis, or treatment.</p>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/tabs.js') }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

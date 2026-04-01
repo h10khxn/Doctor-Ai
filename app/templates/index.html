@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Symptom Checker{% endblock %}
+{% block meta_desc %}Enter your symptoms to get an AI-powered preliminary disease assessment. Supports text, voice, and camera input.{% endblock %}
+
+{% block content %}
+<section class="hero" aria-labelledby="hero-title">
+  <div class="container">
+    <span class="hero-eyebrow">Free &amp; Private &nbsp;·&nbsp; No Sign-up Required</span>
+    <h1 id="hero-title" class="hero-title">Not feeling well?<br><span class="gradient-text">Let's figure it out.</span></h1>
+    <p class="hero-subtitle">Describe how you're feeling, pick your symptoms, or show us with your camera — and get a preliminary assessment in seconds.</p>
+    <a href="#checker" class="hero-cta">Check My Symptoms &darr;</a>
+    <div class="hero-stats">
+      <div>
+        <div class="hero-stat-value">4,920</div>
+        <div class="hero-stat-label">Training Examples</div>
+      </div>
+      <div>
+        <div class="hero-stat-value">42</div>
+        <div class="hero-stat-label">Disease Classes</div>
+      </div>
+      <div>
+        <div class="hero-stat-value">99.9%</div>
+        <div class="hero-stat-label">Model Accuracy</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="checker" class="checker-section" aria-label="Symptom checker">
+  <div class="container">
+
+    <div class="tab-nav" role="tablist" aria-label="Input method">
+      <button class="tab-btn active" role="tab" aria-selected="true"  aria-controls="tab-nlp"      id="btn-nlp">&#x1F4AC; Describe</button>
+      <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="tab-checkbox"  id="btn-checkbox">&#x2611; Select Symptoms</button>
+      <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="tab-camera"    id="btn-camera">&#x1F4F7; Camera</button>
+    </div>
+
+    <!-- NLP Tab -->
+    <div id="tab-nlp" class="tab-panel active card" role="tabpanel" aria-labelledby="btn-nlp">
+      <label for="nlp-input" class="form-label">Describe your symptoms</label>
+      <div class="nlp-input-group">
+        <textarea id="nlp-input" class="form-textarea"
+          placeholder="e.g. I have a fever, my skin is really itchy and I keep sneezing..."
+          rows="4" aria-describedby="nlp-hint"></textarea>
+        <button class="btn-mic" id="mic-btn" aria-label="Start voice input" aria-pressed="false" title="Click to speak">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </button>
+      </div>
+      <p id="nlp-hint" class="form-hint">Voice input works in Chrome and Edge. Speak naturally — AI will extract matching symptoms.</p>
+      <button class="btn btn-primary btn-block" onclick="submitNLP()">Analyze Symptoms</button>
+    </div>
+
+    <!-- Checkbox Tab -->
+    <div id="tab-checkbox" class="tab-panel card" role="tabpanel" aria-labelledby="btn-checkbox">
+      <label class="form-label">Search and select your symptoms</label>
+      <input class="search-box" type="search" placeholder="Search symptoms..." oninput="filterSymptoms(this.value)" aria-label="Search symptoms" />
+      <div class="symptom-grid" id="symptom-grid" role="group" aria-label="Symptom checkboxes">
+        {% for s in symptoms %}
+        <div class="symptom-item" data-label="{{ s.label|lower }}">
+          <label>
+            <input type="checkbox" value="{{ s.key }}" onchange="updateCount()" />
+            {{ s.label }}
+          </label>
+        </div>
+        {% endfor %}
+      </div>
+      <p class="selected-count" id="selected-count">0 symptoms selected</p>
+      <button class="btn btn-primary btn-block" onclick="submitCheckbox()">Analyze Symptoms</button>
+    </div>
+
+    <!-- Camera Tab -->
+    <div id="tab-camera" class="tab-panel card" role="tabpanel" aria-labelledby="btn-camera">
+      <p class="camera-hint">Point your camera at the affected area (e.g. a skin rash). The AI will detect visible symptoms and provide an assessment.</p>
+      <div class="camera-container" aria-label="Camera preview">
+        <video id="camera-video" autoplay playsinline muted aria-label="Live camera feed"></video>
+      </div>
+      <canvas id="camera-canvas" hidden></canvas>
+      <div class="camera-controls">
+        <button class="btn btn-outline" id="camera-start-btn">Start Camera</button>
+        <button class="btn btn-primary" id="camera-capture-btn" disabled>Capture &amp; Analyze</button>
+        <button class="btn btn-outline" id="camera-stop-btn" disabled style="color:#dc2626;border-color:#dc2626">Stop</button>
+      </div>
+      <div class="camera-preview-container" id="camera-preview-container" hidden>
+        <img id="camera-preview" alt="Captured frame for analysis" />
+        <p class="camera-label" id="camera-label-text"></p>
+      </div>
+      <p class="form-hint">Camera detection works best in good lighting. Requires browser permission.</p>
+    </div>
+
+    <!-- Results -->
+    <div id="results" hidden aria-live="polite" aria-atomic="false"></div>
+
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/predict.js') }}"></script>
+<script src="{{ url_for('static', filename='js/voice.js') }}"></script>
+<script src="{{ url_for('static', filename='js/camera.js') }}"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    MicButton.init("nlp-input", document.getElementById("mic-btn"));
+
+    document.getElementById("camera-start-btn").addEventListener("click", async () => {
+      const video = document.getElementById("camera-video");
+      const btn   = document.getElementById("camera-start-btn");
+      const captureBtn = document.getElementById("camera-capture-btn");
+      btn.disabled = true;
+      btn.textContent = "Starting...";
+      const result = await CameraCapture.startCamera(video);
+      if (result && result.error) {
+        btn.disabled = false;
+        btn.textContent = "Start Camera";
+        document.getElementById("results").hidden = false;
+        document.getElementById("results").innerHTML = `<div class="alert alert-danger">${result.error}</div>`;
+      } else {
+        captureBtn.disabled = false;
+        document.getElementById("camera-stop-btn").disabled = false;
+        btn.textContent = "Camera Active";
+      }
+    });
+
+    document.getElementById("camera-stop-btn").addEventListener("click", () => {
+      const video = document.getElementById("camera-video");
+      CameraCapture.stopCamera(video);
+      document.getElementById("camera-start-btn").disabled = false;
+      document.getElementById("camera-start-btn").textContent = "Start Camera";
+      document.getElementById("camera-capture-btn").disabled = true;
+      document.getElementById("camera-stop-btn").disabled = true;
+    });
+
+    document.getElementById("camera-capture-btn").addEventListener("click", () => {
+      const video  = document.getElementById("camera-video");
+      const canvas = document.getElementById("camera-canvas");
+      CameraCapture.analyzeFrame(video, canvas);
+    });
+  });
+</script>
+{% endblock %}

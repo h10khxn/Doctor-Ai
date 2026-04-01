@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}About{% endblock %}
+{% block meta_desc %}Learn about Mini Doctor AI — an AI-powered symptom checker built with DistilBERT and trained on a 42-disease medical dataset.{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <h1>About Mini Doctor AI</h1>
+    <p>An open-source AI symptom checker built with modern machine learning.</p>
+  </div>
+</section>
+
+<section class="info-section">
+  <div class="container">
+    <div class="info-grid">
+      <div class="info-card animate-fade-up">
+        <div class="info-card-icon">&#x1F9E0;</div>
+        <h3>DistilBERT Model</h3>
+        <p>Powered by a fine-tuned DistilBERT transformer model trained on 4,920 disease-symptom examples across 42 disease classes.</p>
+      </div>
+      <div class="info-card animate-fade-up">
+        <div class="info-card-icon">&#x1F4CA;</div>
+        <h3>High Accuracy</h3>
+        <p>Achieved 99.9% validation accuracy after fine-tuning. Uses softmax probabilities to rank the top 3 most likely conditions.</p>
+      </div>
+      <div class="info-card animate-fade-up">
+        <div class="info-card-icon">&#x1F50D;</div>
+        <h3>Fuzzy NLP</h3>
+        <p>Natural language symptom extraction using rapidfuzz token matching — handles typos, word order, and synonym variations.</p>
+      </div>
+      <div class="info-card animate-fade-up">
+        <div class="info-card-icon">&#x1F4F7;</div>
+        <h3>Camera Detection</h3>
+        <p>Optional visual symptom detection using a computer vision model to identify visible skin conditions from your camera.</p>
+      </div>
+      <div class="info-card animate-fade-up">
+        <div class="info-card-icon">&#x1F3DB;</div>
+        <h3>Open Source</h3>
+        <p>Built with Python, Flask, and Hugging Face Transformers. The full source code and training pipeline are available on GitHub.</p>
+      </div>
+      <div class="info-card animate-fade-up">
+        <div class="info-card-icon">&#x26A0;</div>
+        <h3>Disclaimer</h3>
+        <p>This tool is for informational and educational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment.</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

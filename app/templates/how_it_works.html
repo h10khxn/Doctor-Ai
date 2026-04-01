@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}How It Works{% endblock %}
+{% block meta_desc %}Understand how Mini Doctor AI processes your symptoms using a DistilBERT transformer model to predict likely diseases.{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <h1>How It Works</h1>
+    <p>From symptoms to prediction — the full pipeline explained.</p>
+  </div>
+</section>
+
+<section class="info-section">
+  <div class="container">
+    <div class="card animate-fade-up" style="margin-bottom:2rem">
+      <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:1.25rem">The Prediction Pipeline</h2>
+      <div class="steps-list">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>Input</h4>
+            <p>You enter symptoms via text description, checkbox selection, or camera capture. Text input is processed with fuzzy NLP matching; camera frames are analyzed by a computer vision model.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>Tokenization</h4>
+            <p>Matched symptom keywords are joined into a text string and tokenized by DistilBERT's tokenizer — splitting words into subword tokens and mapping them to integer IDs.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>Transformer Inference</h4>
+            <p>Tokens are passed through the fine-tuned DistilBERT model. The [CLS] token's final embedding is fed into a classification head that outputs 42 logit scores — one per disease.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h4>Softmax Ranking</h4>
+            <p>Logits are converted to probabilities via softmax (summing to 100%). The top 3 diseases by probability are returned as the prediction result.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">5</div>
+          <div class="step-content">
+            <h4>Result Enrichment</h4>
+            <p>Each predicted disease is matched to its description and recommended precautions from our medical reference dataset, giving you actionable information alongside the diagnosis.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-card animate-fade-up">
+        <div class="info-card-icon">&#x1F4DA;</div>
+        <h3>Training Data</h3>
+        <p>4,920 disease-symptom examples across 42 unique diseases. Each example combines up to 17 symptoms as a comma-separated text string.</p>
+      </div>
+      <div class="info-card animate-fade-up">
+        <div class="info-card-icon">&#x1F916;</div>
+        <h3>Base Model</h3>
+        <p>distilbert-base-uncased — a lightweight 66M parameter BERT variant pretrained on English Wikipedia and BooksCorpus, fine-tuned for medical classification.</p>
+      </div>
+      <div class="info-card animate-fade-up">
+        <div class="info-card-icon">&#x1F3AF;</div>
+        <h3>Training Setup</h3>
+        <p>3 epochs, batch size 32, learning rate 2e-5, max token length 64. Evaluated on a 20% held-out validation split after each epoch.</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

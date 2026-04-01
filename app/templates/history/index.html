@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}My History{% endblock %}
+{% block meta_desc %}View your past symptom checks and AI predictions.{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <h1>My History</h1>
+    <p>Your last 50 symptom checks. Logged in as <strong>{{ current_user.username }}</strong>.</p>
+  </div>
+</section>
+
+<section class="history-section">
+  <div class="container">
+    {% if not records %}
+      <div class="card history-empty">
+        <p>No predictions yet.</p>
+        <a href="{{ url_for('routes.index') }}" class="btn btn-primary">Check Symptoms</a>
+      </div>
+    {% else %}
+      <div class="card">
+        <div class="history-table-wrap">
+          <table class="history-table" aria-label="Prediction history">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Mode</th>
+                <th>Symptoms</th>
+                <th>Top Result</th>
+                <th>Confidence</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in records %}
+              <tr>
+                <td>{{ r.created_at.strftime('%b %d, %Y %H:%M') }}</td>
+                <td>
+                  {% if r.input_mode == 'camera' %}
+                    <span class="badge badge-info">Camera</span>
+                  {% elif r.input_mode == 'nlp' %}
+                    <span class="badge badge-primary">NLP</span>
+                  {% else %}
+                    <span class="badge badge-warning">Checkbox</span>
+                  {% endif %}
+                </td>
+                <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ r.matched_symptoms }}">
+                  {{ r.matched_symptoms }}
+                </td>
+                <td class="disease-cell">{{ r.top_disease }}</td>
+                <td>
+                  <span class="badge badge-success">{{ r.top_confidence }}%</span>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

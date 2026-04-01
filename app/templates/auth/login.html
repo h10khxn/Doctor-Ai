@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block meta_desc %}Log in to Mini Doctor AI to save and view your symptom history.{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+  <div class="container">
+    <div class="card auth-card">
+      <h2>Welcome back</h2>
+      <p>Log in to save your symptom history.</p>
+      <form method="POST" action="{{ url_for('auth.login') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <div class="form-group">
+          <label for="email" class="form-label">Email</label>
+          <input id="email" name="email" type="email" class="form-input" required autocomplete="email" placeholder="you@example.com" />
+        </div>
+        <div class="form-group">
+          <label for="password" class="form-label">Password</label>
+          <input id="password" name="password" type="password" class="form-input" required autocomplete="current-password" placeholder="••••••••" />
+        </div>
+        <div class="form-group">
+          <label class="remember-row">
+            <input type="checkbox" name="remember" /> Remember me
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Log In</button>
+      </form>
+      <p class="auth-footer">Don't have an account? <a href="{{ url_for('auth.register') }}">Register</a></p>
+    </div>
+  </div>
+</section>
+{% endblock %}
